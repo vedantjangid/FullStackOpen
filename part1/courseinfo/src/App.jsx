@@ -47,9 +47,9 @@ const Content = (props) => {
 };
 const Total = (props) => {
   const { exercises1, exercises2, exercises3 } = props;
-  const totalExp = exercises1 + exercises2 + exercises3;
+  const totalExe = exercises1 + exercises2 + exercises3;
 
-  return <p>Number of exercises {totalExp}</p>;
+  return <p>Number of exercises {totalExe}</p>;
 };
 
 const App = () => {
