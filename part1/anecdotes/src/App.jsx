@@ -14,7 +14,6 @@ const App = () => {
 
   const [selected, setSelected] = useState(0);
   const [points, setPoints] = useState(new Array(anecdotes.length).fill(0));
-  const [mxlikes, setMxlikes] = useState(0);
 
   // Generate a random integer between min (inclusive) and max (inclusive)
   function getRandomInt(min, max) {
@@ -23,19 +22,16 @@ const App = () => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  // Example: Generate a random number between 1 and 10
-
   const randomNum = getRandomInt(0, anecdotes.length - 1);
-
-  const maxLikes = Math.max(...points);
-  let mxquote = anecdotes[maxLikes];
-  console.log(maxLikes);
 
   const vote = () => {
     const updatedPoints = [...points];
     updatedPoints[selected] += 1;
     setPoints(updatedPoints);
   };
+
+  // Find the index with the maximum value in the points array
+  const maxLikesIndex = points.indexOf(Math.max(...points));
 
   return (
     <>
@@ -45,7 +41,8 @@ const App = () => {
       <button onClick={vote}>vote</button>
       <button onClick={() => setSelected(randomNum)}>next anecdote</button>
       <h1>Anecdote with most votes</h1>
-      <div>{mxquote}</div>
+      <div>{anecdotes[maxLikesIndex]}</div>
+      <p>votes {points[maxLikesIndex]}</p>
     </>
   );
 };
