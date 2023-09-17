@@ -31,7 +31,7 @@ const Statistics = (props) => {
 
           <Statistic name="total" value={props.total} />
 
-          <Statistic name="averageScore" value={props.averageScore} />
+          <Statistic name="average" value={props.averageScore} />
 
           <Statistic
             name="percentPositive"
