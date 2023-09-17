@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+
 const Header = (props) => {
   return <h1>{props.name}</h1>;
 };
@@ -30,14 +31,29 @@ const Content = (props) => {
   return <Parts course={props.course} />;
 };
 
+// function Course({ course }) {
+//   console.log(course);
+//   return (
+//    { course.map((val)=> (
+//     console.log("p")
+//     <div>
+//         <Header name={course.name} />
+//         <Content course={course.parts} />
+//       </div>
+//       ) )}
+//   );
+// }
+
 function Course({ course }) {
-  console.log(course);
   return (
-    <div>
-      <Header name={course.name} />
-      <Content course={course.parts} />
-    </div>
+    <>
+      {course.map((val, index) => (
+        <div key={index}>
+          <Header name={val.name} />
+          <Content course={val.parts} />
+        </div>
+      ))}
+    </>
   );
 }
-
 export default Course;
