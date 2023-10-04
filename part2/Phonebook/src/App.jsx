@@ -15,7 +15,56 @@ const App = () => {
 
   const handleFilterChange = (e) => setFilter(e.target.value);
 
-  // const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const nameExists = persons.some((person) => person.name === newName);
+
+    let sameNameId;
+
+    persons.forEach((person) => {
+      if (person.name === newName) {
+        sameNameId = person.id;
+      }
+    });
+
+    console.log(sameNameId);
+
+    console.log(nameExists.id);
+    if (nameExists) {
+      const userConfirmed = window.confirm(
+        `${newName} is already added to the phonebook, replace the old number with a new one?`
+      );
+      if (userConfirmed) {
+        console.log("clicked ok");
+        const newPerson = {
+          name: newName,
+          number: newNumber,
+        };
+
+        update(sameNameId, newPerson);
+        getAll().then((response) => {
+          const data = response.data;
+          setPersons(data);
+        });
+        setNewName("");
+        setNewNumber("");
+      } else {
+        console.log("User clicked Cancel");
+      }
+    } else {
+      const newPerson = {
+        name: newName,
+        number: newNumber,
+      };
+      create(newPerson);
+      console.log("posted");
+      setPersons([...persons, newPerson]);
+      setNewName("");
+      setNewNumber("");
+    }
+  };
+
+  // const handleSubmit = async (e) => {
   //   e.preventDefault();
   //   const nameExists = persons.some((person) => person.name === newName);
 
@@ -42,7 +91,25 @@ const App = () => {
   //         number: newNumber,
   //       };
 
-  //       update(sameNameId, newPerson);
+  //       try {
+  //         const updatedPerson = await update(sameNameId, newPerson);
+
+  //         // Check if the updated person is undefined or null
+  //         if (!updatedPerson) {
+  //           console.error("Error updating person: Person is undefined or null");
+  //           return;
+  //         }
+
+  //         // Update the persons state with the new information
+  //         setPersons((prevPersons) =>
+  //           prevPersons.map((person) =>
+  //             person.id === sameNameId ? updatedPerson : person
+  //           )
+  //         );
+  //       } catch (error) {
+  //         console.error("Error updating note:", error);
+  //         // Handle the error, e.g., display an error message to the user
+  //       }
   //     } else {
   //       console.log("User clicked Cancel");
   //     }
@@ -51,88 +118,26 @@ const App = () => {
   //       name: newName,
   //       number: newNumber,
   //     };
-  //     create(newPerson);
-  //     console.log("posted");
-  //     setPersons([...persons, newPerson]);
-  //     setNewName("");
-  //     setNewNumber("");
+  //     try {
+  //       const createdPerson = await create(newPerson);
+
+  //       // Check if the created person is undefined or null
+  //       if (!createdPerson) {
+  //         console.error("Error creating person: Person is undefined or null");
+  //         return;
+  //       }
+
+  //       // Update the persons state with the new person
+  //       setPersons([...persons, createdPerson]);
+  //       console.log("posted");
+  //       setNewName("");
+  //       setNewNumber("");
+  //     } catch (error) {
+  //       console.error("Error creating note:", error);
+  //       // Handle the error, e.g., display an error message to the user
+  //     }
   //   }
   // };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const nameExists = persons.some((person) => person.name === newName);
-
-    let sameNameId;
-
-    persons.forEach((person) => {
-      if (person.name === newName) {
-        sameNameId = person.id;
-      }
-    });
-
-    console.log(sameNameId);
-
-    console.log(nameExists.id);
-    if (nameExists) {
-      const userConfirmed = window.confirm(
-        `${newName} is already added to the phonebook, replace the old number with a new one`
-      );
-
-      if (userConfirmed) {
-        console.log("clicked ok");
-        const newPerson = {
-          name: newName,
-          number: newNumber,
-        };
-
-        try {
-          const updatedPerson = await update(sameNameId, newPerson);
-
-          // Check if the updated person is undefined or null
-          if (!updatedPerson) {
-            console.error("Error updating person: Person is undefined or null");
-            return;
-          }
-
-          // Update the persons state with the new information
-          setPersons((prevPersons) =>
-            prevPersons.map((person) =>
-              person.id === sameNameId ? updatedPerson : person
-            )
-          );
-        } catch (error) {
-          console.error("Error updating note:", error);
-          // Handle the error, e.g., display an error message to the user
-        }
-      } else {
-        console.log("User clicked Cancel");
-      }
-    } else {
-      const newPerson = {
-        name: newName,
-        number: newNumber,
-      };
-      try {
-        const createdPerson = await create(newPerson);
-
-        // Check if the created person is undefined or null
-        if (!createdPerson) {
-          console.error("Error creating person: Person is undefined or null");
-          return;
-        }
-
-        // Update the persons state with the new person
-        setPersons([...persons, createdPerson]);
-        console.log("posted");
-        setNewName("");
-        setNewNumber("");
-      } catch (error) {
-        console.error("Error creating note:", error);
-        // Handle the error, e.g., display an error message to the user
-      }
-    }
-  };
 
   const filteredPersons = persons.filter((person) =>
     person.name.toLowerCase().includes(filter.toLowerCase())
