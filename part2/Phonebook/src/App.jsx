@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 import { getAll, create, deleteNote, update } from "../src/services/notes";
 
 const App = () => {
@@ -9,6 +10,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [alert, setAlert] = useState("");
 
   const handleNameChange = (e) => setNewName(e.target.value);
   const handleNumberChange = (e) => setNewNumber(e.target.value);
@@ -27,8 +29,6 @@ const App = () => {
       }
     });
 
-    console.log(sameNameId);
-
     console.log(nameExists.id);
     if (nameExists) {
       const userConfirmed = window.confirm(
@@ -41,7 +41,16 @@ const App = () => {
           number: newNumber,
         };
 
-        update(sameNameId, newPerson);
+        update(sameNameId, newPerson).catch(() => {
+          setAlert(`the note '${newName}' was already deleted from server`);
+          setPersons(persons.filter((n) => n.name !== newName));
+        });
+
+        setAlert(`Number was changed for ${newName}`);
+        setTimeout(() => {
+          setAlert(null);
+        }, 5000);
+
         getAll().then((response) => {
           const data = response.data;
           setPersons(data);
@@ -57,6 +66,10 @@ const App = () => {
         number: newNumber,
       };
       create(newPerson);
+      setAlert(`${newName} was added to phonebook`);
+      setTimeout(() => {
+        setAlert(null);
+      }, 5000);
       console.log("posted");
       setPersons([...persons, newPerson]);
       setNewName("");
@@ -188,6 +201,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={alert} />
 
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
 
