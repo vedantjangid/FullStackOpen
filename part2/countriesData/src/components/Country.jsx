@@ -25,6 +25,7 @@
 // export default Country;
 
 import React, { useState } from "react";
+import Weather from "./Weather";
 
 function Country({ name, capital, area, flag, languages }) {
   const [showDetails, setShowDetails] = useState(false);
@@ -47,6 +48,7 @@ function Country({ name, capital, area, flag, languages }) {
             ))}
           </ul>
           <h1 style={{ fontSize: 200, padding: 0, margin: 0 }}>{flag}</h1>
+          <Weather name={name} />
           <button onClick={handleShow}>hide</button>
         </div>
       ) : (

@@ -59,13 +59,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Country from "./components/Country";
+import Weather from "./components/Weather";
 
 const App = () => {
   const [countries, setCountries] = useState([]);
   const [countryName, setCountryName] = useState("");
   const [filteredCountryName, setFilteredCountryName] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [show, setShow] = useState(false);
+
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -109,10 +110,6 @@ const App = () => {
     setCountryName(event.target.value);
   };
 
-  const handleShow = () => {
-    setShow(!show);
-  };
-
   return (
     <div>
       <h2>Countries</h2>
@@ -124,7 +121,6 @@ const App = () => {
           placeholder="Enter country name"
         />
       </form>
-      <p>Input: {countryName}</p>
 
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
@@ -135,15 +131,16 @@ const App = () => {
         <p>Too many matches, specify another filter</p>
       ) : (
         filteredCountryName.map((country, i) => (
-          <Country
-            show={show}
-            key={i}
-            name={country.name.common}
-            capital={country.capital}
-            area={country.area}
-            flag={country.flag}
-            languages={Object.values(country.languages)}
-          />
+          <>
+            <Country
+              key={i}
+              name={country.name.common}
+              capital={country.capital}
+              area={country.area}
+              flag={country.flag}
+              languages={Object.values(country.languages)}
+            />
+          </>
         ))
       )}
     </div>
