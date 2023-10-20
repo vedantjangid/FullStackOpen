@@ -1,8 +1,11 @@
 const express = require("express");
 var morgan = require("morgan");
+var cors = require("cors");
 
 const app = express();
+app.use(express.static("dist"));
 app.use(express.json());
+app.use(cors());
 
 morgan.token("postData", (req) => {
   if (req.method === "POST" && req.body) {
@@ -102,6 +105,7 @@ app.post("/api/persons", (req, res) => {
     const max = 19999999;
     const randomInt = Math.floor(Math.random() * (max - min + 1) + min);
     const person = {
+      key: randomInt,
       id: randomInt,
       name: body.name,
       number: body.number,
@@ -113,6 +117,6 @@ app.post("/api/persons", (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(process.env.PORT || port, () => {
   console.log(`application running on port ${port}`);
 });
