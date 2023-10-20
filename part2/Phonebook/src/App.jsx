@@ -11,6 +11,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
   const [alert, setAlert] = useState("");
+  const [key, setKey] = useState("");
 
   const handleNameChange = (e) => setNewName(e.target.value);
   const handleNumberChange = (e) => setNewNumber(e.target.value);
@@ -195,6 +196,8 @@ const App = () => {
     getAll().then((response) => {
       const data = response.data;
       setPersons(data);
+      const key = data.id;
+      setKey(key);
     });
   }, []);
 
@@ -209,6 +212,7 @@ const App = () => {
       <h3>Add a new</h3>
 
       <PersonForm
+        key={key}
         newName={newName}
         newNumber={newNumber}
         handleNameChange={handleNameChange}

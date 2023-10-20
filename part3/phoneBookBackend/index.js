@@ -1,10 +1,30 @@
 const express = require("express");
+var morgan = require("morgan");
 
 const app = express();
+app.use(express.json());
+
+morgan.token("postData", (req) => {
+  if (req.method === "POST" && req.body) {
+    return JSON.stringify(req.body);
+  } else {
+    return "-";
+  }
+});
+
+// Use the custom token in the log format
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms :postData",
+    {
+      // ...other options...
+    }
+  )
+);
 
 const port = 3001;
 
-const Persons = [
+let Persons = [
   {
     id: 1,
     name: "Arto Hellas",
@@ -42,11 +62,54 @@ app.get("/info", (req, res) => {
 
 app.get("/api/persons/:id", (req, res) => {
   const id = Number(req.params.id);
-  const person = Persons.find((p) => p.id === id);
-  if (!person) {
+  const Person = Persons.find((p) => p.id === id);
+  if (!Persons) {
     res.status(404).end();
   } else {
-    res.json(person);
+    res.json(Person);
+  }
+});
+
+app.delete("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const filteredPersons = Persons.filter((p) => p.id !== id);
+  //   if (!filteredPersons) {
+  //     res.status(404).end();
+  //   } else {
+  //     res.send(filteredPersons).status(204).end();
+  //   }
+
+  if (filteredPersons.length === Persons.length) {
+    res.status(404).end();
+  } else {
+    Persons = filteredPersons; // Update the Persons array
+    res.status(204).end(); // Respond with a 204 status code (No Content)
+  }
+});
+
+app.post("/api/persons", (req, res) => {
+  const body = req.body;
+  const nameExists = Persons.some((p) => p.name === body.name);
+
+  if (!body.name || !body.number) {
+    return res.status(400).json({ error: "Name or number is missing" });
+  } else if (nameExists) {
+    return res
+      .status(400)
+      .json({ error: "A person with the same name already exists" });
+  } else {
+    const min = 0;
+    const max = 19999999;
+    const randomInt = Math.floor(Math.random() * (max - min + 1) + min);
+    const person = {
+      id: randomInt,
+      name: body.name,
+      number: body.number,
+    };
+
+    Persons.push(person);
+
+    return res.status(201).json(person);
   }
 });
 
