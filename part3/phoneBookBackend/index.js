@@ -1,6 +1,7 @@
 const express = require("express");
 var morgan = require("morgan");
 var cors = require("cors");
+const Persons = require("./module/number");
 
 const app = express();
 app.use(express.static("dist"));
@@ -27,31 +28,31 @@ app.use(
 
 const port = 3001;
 
-let Persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+// let Persons = [
+//   {
+//     id: 1,
+//     name: "Arto Hellas",
+//     number: "040-123456",
+//   },
+//   {
+//     id: 2,
+//     name: "Ada Lovelace",
+//     number: "39-44-5323523",
+//   },
+//   {
+//     id: 3,
+//     name: "Dan Abramov",
+//     number: "12-43-234345",
+//   },
+//   {
+//     id: 4,
+//     name: "Mary Poppendieck",
+//     number: "39-23-6423122",
+//   },
+// ];
 
 app.get("/api/persons", (req, res) => {
-  res.send(Persons);
+  Persons.find({}).then((data) => res.send(data));
 });
 
 app.get("/info", (req, res) => {
@@ -92,29 +93,69 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
   const body = req.body;
-  const nameExists = Persons.some((p) => p.name === body.name);
-
-  if (!body.name || !body.number) {
-    return res.status(400).json({ error: "Name or number is missing" });
-  } else if (nameExists) {
-    return res
-      .status(400)
-      .json({ error: "A person with the same name already exists" });
-  } else {
-    const min = 0;
-    const max = 19999999;
-    const randomInt = Math.floor(Math.random() * (max - min + 1) + min);
-    const person = {
-      key: randomInt,
-      id: randomInt,
-      name: body.name,
-      number: body.number,
-    };
-
-    Persons.push(person);
-
-    return res.status(201).json(person);
+  // const nameExists = Persons.some((p) => p.name === body.name);
+  async function checkIfPersonExists() {
+    try {
+      const foundPerson = await Persons.findOne({ name: body.name }).exec();
+      if (foundPerson) {
+        return true;
+        // A matching person was found
+        // Do something when a matching person is found
+      } else {
+        return false;
+        // No matching person was found
+        // Do something when no matching person is found
+      }
+    } catch (err) {
+      console.error("error", err.message);
+      throw err;
+    }
   }
+
+  // Call the async function and handle the result
+  checkIfPersonExists()
+    .then((exists) => {
+      if (!body.name || !body.number) {
+        return res.status(400).json({ error: "Name or number is missing" });
+      } else if (exists) {
+        return res
+          .status(400)
+          .json({ error: "A person with the same name already exists" });
+      } else {
+        const min = 0;
+        const max = 19999999;
+        const randomInt = Math.floor(Math.random() * (max - min + 1) + min);
+
+        const person = new Persons({
+          name: body.name,
+          number: body.number,
+        });
+
+        // const person = {
+        //   key: randomInt,
+        //   id: randomInt,
+        //   name: body.name,
+        //   number: body.number,
+        // };
+
+        person.save().then((result) => {
+          console.log(
+            "added",
+            body.name,
+            "number",
+            body.number,
+            "to phonebook"
+          );
+        });
+
+        // Persons.push(person);
+
+        return res.status(201).json(person);
+      }
+    })
+    .catch((error) => {
+      // Handle errors
+    });
 });
 
 app.listen(process.env.PORT || port, () => {
