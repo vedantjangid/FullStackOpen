@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
-const pass_mongoDb = "pE2ZnGuWyp3xWTyd";
+require("dotenv").config();
 
-const url = `mongodb+srv://root:${pass_mongoDb}@cluster0.dktlfnt.mongodb.net/phonebook?retryWrites=true&w=majority`;
+const password = process.env.MONGODB_PASS;
+
+const url = `mongodb+srv://root:${password}@cluster0.dktlfnt.mongodb.net/phonebook?retryWrites=true&w=majority`;
 mongoose.set("strictQuery", false);
 mongoose
   .connect(url)
