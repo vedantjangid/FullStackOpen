@@ -19,14 +19,18 @@ mongoose.set("strictQuery", false);
 mongoose.connect(url);
 
 const personSchema = mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    minlength: 3,
+    required: true,
+  },
   number: Number,
 });
 
 const Person = mongoose.model("Persons", personSchema);
 
 const person = new Person({
-  name: name,
+  name,
   number: number,
 });
 
@@ -35,7 +39,7 @@ person.save().then((result) => {
   mongoose.connection.close();
 });
 
-if ((process.argv.length = 3)) {
+if (process.argv.length === 3) {
   Person.find({}).then((result) => {
     console.log("phonebook:");
     result.forEach((note) => {

@@ -113,6 +113,8 @@ app.post("/api/persons", async (req, res, next) => {
       // Person exists, update the data
       const updatedPerson = await Persons.findOneAndUpdate(
         { name: body.name },
+        { new: true, runValidators: true, context: "query" },
+
         { number: body.number }, // Update the number (you can update other fields as needed)
         { new: true } // To return the updated document
       );
@@ -126,6 +128,7 @@ app.post("/api/persons", async (req, res, next) => {
       });
 
       const savedPerson = await person.save();
+
       res.status(201).json(savedPerson);
     }
   } catch (err) {
@@ -160,6 +163,8 @@ app.use((err, req, res, next) => {
   if (err.name === "CastError" && err.kind === "ObjectId") {
     // Handle the specific CastError caused by an invalid ID
     return res.status(500).send("Internal Server Error");
+  } else if (err.name === "ValidationError") {
+    return res.status(400).json({ error: err.message });
   }
 
   res.status(500).send("Internal Server Error"); // You can customize the error response as needed
