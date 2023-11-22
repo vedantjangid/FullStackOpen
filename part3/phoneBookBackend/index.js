@@ -65,7 +65,7 @@ app.get("/info", async (req, res) => {
 });
 
 app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
+  // const id = Number(req.params.id);
 
   const Person = Persons.findById(req.params.id)
     .then((person) => {
