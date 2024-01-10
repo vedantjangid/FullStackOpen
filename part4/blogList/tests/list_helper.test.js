@@ -1,8 +1,4 @@
 listHelper = require("../utils/list_helper");
-const supertest = require("supertest");
-const app = require("../controllers/blogs");
-
-const api = supertest(app);
 
 describe("dummy function", () => {
   test("dummy returns one", () => {

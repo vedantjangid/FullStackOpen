@@ -88,11 +88,8 @@ const mostLikes = (blogs) => {
 };
 
 module.exports = {
-  mostLikes,
-};
-
-module.exports = {
   dummy,
+  mostLikes,
   totalLikes,
   favoriteBlog,
   mostBlogs,
