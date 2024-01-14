@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 
 blogsRouter.get("/", async (request, response) => {
   try {
+    console.log(request.user);
     response.send("Blogs website");
   } catch (error) {
     response.status(500).json({ error: error.message });
@@ -31,54 +32,76 @@ blogsRouter.get("/api/blogs", async (request, response) => {
   }
 });
 
+// blogsRouter.post("/api/blogs", ...)
 blogsRouter.post("/api/blogs", async (request, response) => {
-  const blogData = request.body;
-
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "token invalid" });
-  }
-  const user = await User.findById(decodedToken.id);
-
-  const blog = new Blog({
-    ...blogData,
-    user: user._id, // Set the user ID for the blog
-  });
-
   try {
-    // const result = await blog.save();
-    // response.status(201).json(result);
+    // console.log("0");
+    const token = request.token;
+    // console.log(token);x
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+
+    const blogData = request.body;
+    // console.log("1");
+
+    // Check if request.user is defined
+    if (!request.user || !request.user.id) {
+      return response.status(401).json({ error: "Token invalid" });
+    }
+    // console.log("2");
+
+    const user = await User.findById(decodedToken.id);
+    // console.log("3");
+
+    const blog = new Blog({
+      ...blogData,
+      user: user._id,
+    });
+    // console.log("4");
 
     const result = await blog.save();
+    // console.log("5");
 
-    // Add the new blog post's ID to the user's blogs array
     user.blogs = user.blogs.concat(result._id);
+    // console.log("6");
 
-    // Save the updated user data
     await user.save();
+    // console.log("7");
 
-    // Respond with a JSON object containing the result of the blog creation
     response.status(201).json(result);
+    // console.log("");
   } catch (error) {
     response.status(400).json({ error: error.message });
   }
 });
 
 blogsRouter.delete("/api/blogs/:id", async (request, response) => {
-  const id = request.params.id;
-
   try {
-    // Use deleteOne on the model to delete a blog by its ID
-    const result = await Blog.deleteOne({ _id: id });
+    const userToken = request.user;
+    if (!userToken) {
+      return response.status(401).json({ error: "Token missing" });
+    }
 
-    // Check if the blog was found and deleted
-    if (result.deletedCount === 1) {
-      response.status(204).end(); // No content, successful deletion
+    if (!userToken.id) {
+      return response.status(401).json({ error: "Token invalid" });
+    }
+
+    const user = await User.findById(userToken.id);
+
+    const blogToDelete = await Blog.findById(request.params.id);
+
+    if (!blogToDelete) {
+      return response.status(404).json({ error: "Blog not found" });
+    }
+
+    if (blogToDelete.user._id.toString() === user._id.toString()) {
+      await Blog.findByIdAndRemove(request.params.id);
+      return response.status(204).end();
     } else {
-      response.status(404).json({ error: "Blog not found" });
+      return response.status(401).json({ error: "Unauthorized" });
     }
   } catch (error) {
-    response.status(500).json({ error: error.message });
+    console.error("JWT verification error:", error.message);
+    return response.status(401).json({ error: "Invalid token" });
   }
 });
 
