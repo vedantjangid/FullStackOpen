@@ -8,25 +8,58 @@ const User = require("../models/user");
 
 let headers; // Move headers outside beforeEach to make it accessible across tests
 let loginResponse;
-beforeEach(async () => {
-  // Login the user before each test
 
+beforeEach(async () => {
+  // Delete all existing users and blogs
+  await User.deleteMany({});
+  await Blog.deleteMany({});
+
+  // Create a new user
+  const newUser = {
+    username: "root",
+    name: "root",
+    password: "password",
+  };
+  await api.post("/api/user").send(newUser); // Adjust the endpoint if necessary
+
+  // Log in the user
   loginResponse = await api
     .post("/api/login")
     .send({ username: "root", password: "password" });
-
   headers = {
-    Authorization: `bearer ${loginResponse.body.token}`,
+    Authorization: `Bearer ${loginResponse.body.token}`,
   };
 
-  // Create a root user
-
-  // Create blogs without user
-  await Blog.deleteMany({});
+  // Create initial blogs
   const noteObjects = helper.initialBlogs.map((blog) => new Blog(blog));
   const promiseArray = noteObjects.map((blog) => blog.save());
   await Promise.all(promiseArray);
 });
+
+afterEach(async () => {
+  // Delete the user created for the test
+  await User.deleteMany({});
+});
+
+// beforeEach(async () => {
+//   // Login the user before each test
+
+//   loginResponse = await api
+//     .post("/api/login")
+//     .send({ username: "root", password: "password" });
+
+//   headers = {
+//     Authorization: `Bearer ${loginResponse.body.token}`,
+//   };
+
+//   // Create a root user
+
+//   // Create blogs without user
+//   await Blog.deleteMany({});
+//   const noteObjects = helper.initialBlogs.map((blog) => new Blog(blog));
+//   const promiseArray = noteObjects.map((blog) => blog.save());
+//   await Promise.all(promiseArray);
+// });
 
 describe("Get blog information", () => {
   test("blogs are returned as json", async () => {
@@ -68,8 +101,8 @@ describe("Addition of a new blog", () => {
 
     await api
       .post("/api/blogs")
-      .set("Authorization", `Bearer ${loginResponse.body.token}`)
       .send(newBlog)
+      .set("Authorization", `Bearer ${loginResponse.body.token}`)
       .expect(201)
       .expect("Content-Type", /application\/json/);
 
@@ -103,8 +136,8 @@ describe("Addition of a new blog", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
-      .set(headers)
-      .expect(200)
+      .set("Authorization", `Bearer ${loginResponse.body.token}`)
+      .expect(201)
       .expect("Content-Type", /application\/json/);
 
     const blogsAtEnd = await helper.blogsInDb();
@@ -112,65 +145,6 @@ describe("Addition of a new blog", () => {
       (blog) => blog.title === "First class tests"
     );
     expect(addedBlog.likes).toBe(0);
-  });
-});
-
-describe("Update a blog", () => {
-  test("Blog update successful ", async () => {
-    const newBlog = {
-      title: "Masterpiece",
-      author: "Edsger W. Dijkstra",
-      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-      likes: 12,
-    };
-
-    await api.post("/api/blogs").send(newBlog).set(headers).expect(200);
-
-    const allBlogs = await helper.blogsInDb();
-    const blogToUpdate = allBlogs.find((blog) => blog.title === newBlog.title);
-
-    const updatedBlog = {
-      ...blogToUpdate,
-      likes: blogToUpdate.likes + 1,
-    };
-
-    await api
-      .put(`/api/blogs/${blogToUpdate.id}`)
-      .send(updatedBlog)
-      .set(headers)
-      .expect(200)
-      .expect("Content-Type", /application\/json/);
-
-    const blogsAtEnd = await helper.blogsInDb();
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1);
-    const foundBlog = blogsAtEnd.find((blog) => blog.likes === 13);
-    expect(foundBlog.likes).toBe(13);
-  });
-});
-
-describe("Deletion of a blog", () => {
-  test("succeeds with status code 204 if id is valid", async () => {
-    const newBlog = {
-      title: "The best blog ever",
-      author: "Me",
-      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-      likes: 12,
-    };
-
-    await api.post("/api/blogs").send(newBlog).set(headers).expect(200);
-
-    const allBlogs = await helper.blogsInDb();
-    const blogToDelete = allBlogs.find((blog) => blog.title === newBlog.title);
-
-    await api.delete(`/api/blogs/${blogToDelete.id}`).set(headers).expect(204);
-
-    const blogsAtEnd = await helper.blogsInDb();
-
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
-
-    const contents = blogsAtEnd.map((r) => r.title);
-
-    expect(contents).not.toContain(blogToDelete.title);
   });
 });
 

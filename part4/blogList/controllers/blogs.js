@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 
 blogsRouter.get("/", async (request, response) => {
   try {
-    console.log(request.user);
     response.send("Blogs website");
   } catch (error) {
     response.status(500).json({ error: error.message });
@@ -35,40 +34,31 @@ blogsRouter.get("/api/blogs", async (request, response) => {
 // blogsRouter.post("/api/blogs", ...)
 blogsRouter.post("/api/blogs", async (request, response) => {
   try {
-    // console.log("0");
     const token = request.token;
-    // console.log(token);x
+
     const decodedToken = jwt.verify(token, process.env.SECRET);
 
     const blogData = request.body;
-    // console.log("1");
 
     // Check if request.user is defined
     if (!request.user || !request.user.id) {
       return response.status(401).json({ error: "Token invalid" });
     }
-    // console.log("2");
 
     const user = await User.findById(decodedToken.id);
-    // console.log("3");
 
     const blog = new Blog({
       ...blogData,
       user: user._id,
     });
-    // console.log("4");
 
     const result = await blog.save();
-    // console.log("5");
 
     user.blogs = user.blogs.concat(result._id);
-    // console.log("6");
 
     await user.save();
-    // console.log("7");
 
     response.status(201).json(result);
-    // console.log("");
   } catch (error) {
     response.status(400).json({ error: error.message });
   }
