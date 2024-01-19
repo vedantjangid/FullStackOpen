@@ -1,12 +1,14 @@
 import axios from "axios";
-const baseUrl = "http://localhost:3001/api/persons";
+// const baseUrl = "http://localhost:3001/api/persons";
+const baseUrl = "/api/persons";
 
 const getAll = () => {
   return axios.get(baseUrl);
 };
 
 const create = (newObject) => {
-  axios.post(baseUrl, newObject);
+  const res = axios.post(baseUrl, newObject);
+  return res;
 };
 
 const deleteNote = (id) => {
@@ -15,7 +17,17 @@ const deleteNote = (id) => {
 };
 
 const update = async (id, newObject) => {
-  await axios.put(`${baseUrl}/${id}`, newObject);
+  const response = await axios.put(`${baseUrl}/${id}`, newObject);
+  return response.data; // Return the updated object
 };
+
+// const update = async (id, newObject) => {
+//   try {
+//     const response = await axios.put(`${baseUrl}/${id}`, newObject);
+//     return response.data; // Return the updated object
+//   } catch (error) {
+//     throw error; // Rethrow the error for the caller to handle
+//   }
+// };
 
 export { getAll, create, deleteNote, update };

@@ -18,179 +18,87 @@ const App = () => {
 
   const handleFilterChange = (e) => setFilter(e.target.value);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const nameExists = persons.some((person) => person.name === newName);
+  const showAlert = (message) => {
+    setAlert(message);
+    setTimeout(() => {
+      setAlert(null);
+    }, 5000);
+  };
 
-    let sameNameId;
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
 
-    persons.forEach((person) => {
-      if (person.name === newName) {
-        sameNameId = person.id;
+      if (newName.trim() === "") {
+        showAlert("Name cannot be empty");
+        return;
       }
-    });
 
-    console.log(nameExists.id);
-    if (nameExists) {
-      const userConfirmed = window.confirm(
-        `${newName} is already added to the phonebook, replace the old number with a new one?`
-      );
-      if (userConfirmed) {
-        console.log("clicked ok");
+      const nameExists = persons.some((person) => person.name === newName);
+      const sameNameId = persons.find((person) => person.name === newName)?.id;
+
+      if (nameExists) {
+        const userConfirmed = window.confirm(
+          `${newName} is already added to the phonebook, replace the old number with a new one?`
+        );
+
+        if (userConfirmed) {
+          const newPerson = {
+            name: newName,
+            number: newNumber,
+          };
+
+          try {
+            await update(sameNameId, newPerson);
+            showAlert(`Number was changed for ${newName}`);
+            const response = await getAll();
+            setPersons(response.data);
+            setNewName("");
+            setNewNumber("");
+          } catch (error) {
+            showAlert(
+              `Failed to update ${newName}: ${
+                error.response ? error.response.data.error : error.message
+              }`
+            );
+          }
+        }
+      } else {
         const newPerson = {
           name: newName,
           number: newNumber,
         };
 
-        update(sameNameId, newPerson).catch(() => {
-          setAlert(`the note '${newName}' was already deleted from server`);
-          setPersons(persons.filter((n) => n.name !== newName));
-        });
-
-        setAlert(`Number was changed for ${newName}`);
-        setTimeout(() => {
-          setAlert(null);
-        }, 5000);
-
-        getAll().then((response) => {
-          const data = response.data;
-          setPersons(data);
-        });
-        setNewName("");
-        setNewNumber("");
-      } else {
-        console.log("User clicked Cancel");
+        try {
+          const createdPerson = await create(newPerson);
+          console.log(createdPerson.data.name);
+          showAlert(`${createdPerson.data.name} was added to phonebook`);
+          setPersons([...persons, createdPerson.data]);
+          setNewName("");
+          setNewNumber("");
+        } catch (error) {
+          if (error.response && error.response.status === 400) {
+            showAlert(`Validation error: ${error.response.data.error}`);
+          } else {
+            console.log(error);
+          }
+        }
       }
-    } else {
-      const newPerson = {
-        name: newName,
-        number: newNumber,
-      };
-      create(newPerson);
-      setAlert(`${newName} was added to phonebook`);
-      setTimeout(() => {
-        setAlert(null);
-      }, 5000);
-      console.log("posted");
-      setPersons([...persons, newPerson]);
-      setNewName("");
-      setNewNumber("");
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const nameExists = persons.some((person) => person.name === newName);
-
-  //   let sameNameId;
-
-  //   persons.forEach((person) => {
-  //     if (person.name === newName) {
-  //       sameNameId = person.id;
-  //     }
-  //   });
-
-  //   console.log(sameNameId);
-
-  //   console.log(nameExists.id);
-  //   if (nameExists) {
-  //     const userConfirmed = window.confirm(
-  //       `${newName} is already added to the phonebook, replace the old number with a new one`
-  //     );
-
-  //     if (userConfirmed) {
-  //       console.log("clicked ok");
-  //       const newPerson = {
-  //         name: newName,
-  //         number: newNumber,
-  //       };
-
-  //       try {
-  //         const updatedPerson = await update(sameNameId, newPerson);
-
-  //         // Check if the updated person is undefined or null
-  //         if (!updatedPerson) {
-  //           console.error("Error updating person: Person is undefined or null");
-  //           return;
-  //         }
-
-  //         // Update the persons state with the new information
-  //         setPersons((prevPersons) =>
-  //           prevPersons.map((person) =>
-  //             person.id === sameNameId ? updatedPerson : person
-  //           )
-  //         );
-  //       } catch (error) {
-  //         console.error("Error updating note:", error);
-  //         // Handle the error, e.g., display an error message to the user
-  //       }
-  //     } else {
-  //       console.log("User clicked Cancel");
-  //     }
-  //   } else {
-  //     const newPerson = {
-  //       name: newName,
-  //       number: newNumber,
-  //     };
-  //     try {
-  //       const createdPerson = await create(newPerson);
-
-  //       // Check if the created person is undefined or null
-  //       if (!createdPerson) {
-  //         console.error("Error creating person: Person is undefined or null");
-  //         return;
-  //       }
-
-  //       // Update the persons state with the new person
-  //       setPersons([...persons, createdPerson]);
-  //       console.log("posted");
-  //       setNewName("");
-  //       setNewNumber("");
-  //     } catch (error) {
-  //       console.error("Error creating note:", error);
-  //       // Handle the error, e.g., display an error message to the user
-  //     }
-  //   }
-  // };
-
-  const filteredPersons = persons.filter((person) =>
-    person.name.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  //   const filteredPersons = persons.filter((person) =>
-  //   person?.name?.toLowerCase().includes(filter.toLowerCase())
-  // );
-
-  // const noteDeletion = (id) => {
-  //   console.log("clicked");
-  //   deleteNote(id);
-  // };
-
   const noteDeletion = async (id) => {
-    console.log("clicked");
     try {
-      const deletedId = await deleteNote(id);
-      // Filter out the deleted note from the persons state
-      const updatedPersons = persons.filter(
-        (person) => person.id !== deletedId
-      );
+      await deleteNote(id);
+      const updatedPersons = persons.filter((person) => person.id !== id);
       setPersons(updatedPersons);
     } catch (error) {
       console.error("Error deleting note:", error);
       // Handle the error, e.g., display an error message to the user
     }
   };
-
-  // useEffect(() => {
-  //   console.log("effect");
-
-  //   const eventHandler = (response) => {
-  //     console.log("promise fulfilled", response.data);
-  //   };
-
-  //   const promise = axios.get("http://localhost:3001/persons");
-  //   promise.then(eventHandler);
-  // }, []);
 
   useEffect(() => {
     getAll().then((response) => {
@@ -221,9 +129,13 @@ const App = () => {
       />
 
       <h3>Numbers</h3>
-
       <Persons
-        filteredPersons={filteredPersons}
+        filteredPersons={persons.filter(
+          (person) =>
+            person &&
+            person.name &&
+            person.name.toLowerCase().includes(filter.toLowerCase())
+        )}
         noteDeletion={noteDeletion}
         persons={persons}
         setPersons={setPersons}

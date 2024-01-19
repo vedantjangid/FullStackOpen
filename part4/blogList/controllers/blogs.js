@@ -35,6 +35,7 @@ blogsRouter.get("/api/blogs", async (request, response) => {
 blogsRouter.post("/api/blogs", async (request, response) => {
   try {
     const token = request.token;
+    console.log("Received token:", token);
 
     const decodedToken = jwt.verify(token, process.env.SECRET);
 
@@ -42,8 +43,10 @@ blogsRouter.post("/api/blogs", async (request, response) => {
 
     // Check if request.user is defined
     if (!request.user || !request.user.id) {
+      console.log(1);
       return response.status(401).json({ error: "Token invalid" });
     }
+    console.log(2);
 
     const user = await User.findById(decodedToken.id);
 
@@ -60,6 +63,7 @@ blogsRouter.post("/api/blogs", async (request, response) => {
 
     response.status(201).json(result);
   } catch (error) {
+    console.log(error.message);
     response.status(400).json({ error: error.message });
   }
 });
