@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import "./style.css";
+import NewBlog from "./components/newBlog";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -9,10 +9,10 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [newBlogAdded, setNewBlogAdded] = useState(false);
+  const [blogForm, setBlogForm] = useState(false);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
+  const [newBlogAdded, setNewBlogAdded] = useState(false);
 
   const [loginError, setLoginError] = useState(null);
 
@@ -54,15 +54,10 @@ const App = () => {
     // Additional logic for logging out, such as redirecting or resetting other state
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (blog) => {
     const token = user.token;
     // Create a blog object with title, author, and url
-    const blog = {
-      title,
-      author,
-      url,
-    };
+
     const config = {
       headers: { Authorization: `Bearer ${token}` },
     };
@@ -70,25 +65,31 @@ const App = () => {
     try {
       // Call blogService.addNewBlog to add a new blog
       const newBlog = await blogService.addNewBlog(blog, config);
-      console.log(newBlog);
 
       // Check if it is successful
       if (newBlog) {
         // If successful, add the new blog to the list of blogs
         setBlogs(blogs.concat(newBlog));
         setNewBlogAdded(true);
+
+        // Set the title and author state variables
+        setTitle(newBlog.title);
+        setAuthor(newBlog.author);
+
         // Reset success state after a delay (e.g., 3 seconds)
         setTimeout(() => {
           setNewBlogAdded(false);
-          setTitle("");
-          setAuthor("");
-          setUrl("");
+          setTitle(""); // Reset title
+          setAuthor(""); // Reset author
         }, 3000);
       }
     } catch (error) {
       console.log(error.message);
     }
   };
+
+  const hideWhenVisible = { display: blogForm ? "none" : "" };
+  const showWhenVisible = { display: blogForm ? "" : "none" };
 
   return (
     <div className="app-container">
@@ -134,45 +135,17 @@ const App = () => {
             </h3>
           )}
 
-          <h2 className="main-heading">Create New Blog</h2>
-          <form onSubmit={handleSubmit} className="blog-form">
-            <div className="form-group">
-              <label htmlFor="title">Title:</label>
-              <input
-                onChange={({ target }) => setTitle(target.value)}
-                type="text"
-                id="title"
-                name="title"
-                value={title}
-                placeholder="Enter title"
-              />
+          <div>
+            <div style={hideWhenVisible}>
+              <button onClick={() => setBlogForm(true)}>New Blog</button>
             </div>
-            <div className="form-group">
-              <label htmlFor="author">Author:</label>
-              <input
-                onChange={({ target }) => setAuthor(target.value)}
-                type="text"
-                id="author"
-                name="author"
-                value={author}
-                placeholder="Enter author"
-              />
+            <div style={showWhenVisible}>
+              <h2 className="main-heading">Create New Blog</h2>
+              <NewBlog onSubmit={handleSubmit} />
+              <button onClick={() => setBlogForm(false)}>Cancel </button>
             </div>
-            <div className="form-group">
-              <label htmlFor="url">URL:</label>
-              <input
-                onChange={({ target }) => setUrl(target.value)}
-                type="url"
-                id="url"
-                name="url"
-                value={url}
-                placeholder="Enter URL"
-              />
-            </div>
-            <button type="submit" className="submit-button">
-              Submit
-            </button>
-          </form>
+          </div>
+
           {blogs.map((blog) => (
             <div key={blog.id} className="blog">
               <h3 className="blog-title">{blog.title}</h3>
