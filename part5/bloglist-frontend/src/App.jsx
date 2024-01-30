@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import blogService from "./services/blogs";
 import "./style.css";
 import NewBlog from "./components/newBlog";
+import AllBlogs from "./components/AllBlogs";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -146,12 +147,7 @@ const App = () => {
             </div>
           </div>
 
-          {blogs.map((blog) => (
-            <div key={blog.id} className="blog">
-              <h3 className="blog-title">{blog.title}</h3>
-              <p className="blog-author">Author: {blog.author}</p>
-            </div>
-          ))}
+          <AllBlogs blogs={blogs} />
         </>
       )}
     </div>
