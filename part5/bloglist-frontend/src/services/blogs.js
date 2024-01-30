@@ -1,9 +1,10 @@
 import axios from "axios";
 const baseUrl = "/api/blogs";
 
-const getAll = () => {
+const getAll = async () => {
   const request = axios.get(baseUrl);
-  return request.then((response) => response.data);
+  const response = await request;
+  return response.data;
 };
 
 const login = async (credentials) => {
@@ -17,4 +18,27 @@ const addNewBlog = async (data, config) => {
   return response.data;
 };
 
-export default { getAll, login, addNewBlog };
+const like = async (blog) => {
+  const updatedBlog = { ...blog, likes: blog.likes + 1 };
+
+  try {
+    const response = await axios.put(`/api/blogs/${blog.id}`, updatedBlog);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating likes:", error.message);
+    throw error; // Re-throw the error to handle it in the calling code
+  }
+};
+
+const remove = async (id, config) => {
+  try {
+    // console.log("id:", id);
+    // console.log("config:", config);
+    const response = await axios.delete(`/api/blogs/${id}`, config);
+    console.log(response);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export default { getAll, login, addNewBlog, like, remove };

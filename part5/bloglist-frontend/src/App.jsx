@@ -18,8 +18,13 @@ const App = () => {
   const [loginError, setLoginError] = useState(null);
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    blogService.getAll().then((blogs) => {
+      // Sort blogs based on the number of likes in descending order
+      const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
+      setBlogs(sortedBlogs);
+    });
   }, []);
+
   useEffect(() => {
     const storedUser = window.localStorage.getItem("loggedBlogappUser");
 
@@ -147,7 +152,7 @@ const App = () => {
             </div>
           </div>
 
-          <AllBlogs blogs={blogs} />
+          <AllBlogs user={user} blogs={blogs} />
         </>
       )}
     </div>

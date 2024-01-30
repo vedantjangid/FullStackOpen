@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import Blog from "./Blogs";
 
-const AllBlogs = ({ blogs }) => {
+const AllBlogs = ({ blogs, user }) => {
   return (
     <>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog user={user} key={blog.id} blog={blog} />
       ))}
     </>
   );
