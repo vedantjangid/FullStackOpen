@@ -156,4 +156,51 @@ describe("Blog app", function () {
       // .should("not.exist");
     });
   });
+
+  describe("Ordering of Blogs by Likes", function () {
+    it("Blogs are ordered according to likes with the most liked blog first", function () {
+      // Log in as the user who can create blogs
+      cy.get("#username").type("root");
+      cy.get("#password").type("password");
+      cy.get(".login-button").click();
+      cy.contains("Blogs");
+
+      // Create multiple blogs with different numbers of likes
+      cy.contains("New Blog").click();
+      cy.get("#title").type("Blog with most likes");
+      cy.get("#author").type("Cypress");
+      cy.get("#url").type("https://www.example.com");
+      cy.contains("Submit").click();
+      cy.contains("Blog with most likes").parent().contains("show").click();
+
+      cy.wait(3000);
+
+      cy.get("#title").type("Blog with few likes");
+      cy.get("#author").type("Cypress");
+      cy.get("#url").type("https://www.example.com");
+      cy.contains("Submit").click();
+
+      // Like the blogs in a specific order
+      cy.contains("Blog with few likes").parent().contains("show").click();
+      cy.contains("Blog with few likes")
+        .parent()
+        .find("button")
+        .contains("Like")
+        .click();
+      cy.contains("Blog with few likes")
+        .parent()
+        .find("button")
+        .contains("Like")
+        .click();
+      cy.contains("Blog with most likes")
+        .parent()
+        .find("button")
+        .contains("Like")
+        .click();
+
+      // Verify that the blogs are ordered correctly according to the number of likes
+      cy.get(".blog").eq(0).should("contain", "Blog with most likes");
+      cy.get(".blog").eq(1).should("contain", "Blog with few likes");
+    });
+  });
 });
