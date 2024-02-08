@@ -1,21 +1,17 @@
-import React, { useState } from "react";
+// Blog.jsx
+
+import { useState } from "react";
 import blogService from "../services/blogs";
-const Blog = ({ blog, user }) => {
+
+const Blog = ({ blog, user, handleLike, handleRemove }) => {
   const [visible, setVisible] = useState(false);
 
   const toggleVisibility = () => {
     setVisible(!visible);
   };
 
-  const Like = async () => {
-    console.log(blog.id);
-    await blogService.like(blog);
-  };
-
   const removeBlog = async () => {
     const token = user.token;
-    // Create a blog object with title, author, and url
-
     const config = {
       headers: { Authorization: `Bearer ${token}` },
     };
@@ -23,26 +19,30 @@ const Blog = ({ blog, user }) => {
     let text = `Remove Blog ${blog.title} \n by${blog.author} `;
     const res = window.confirm(text);
     if (res) {
-      await blogService.remove(blog.id, config);
+      try {
+        await blogService.remove(blog.id, config);
+        handleRemove(blog.id); // Call the handleRemove function to update state
+        // Perform any additional actions after successful removal
+      } catch (error) {
+        console.error("Error removing the blog:", error.message);
+      }
     }
-    // console.log(res);
-    // console.log(config);
   };
 
   return (
     <div className="blog">
       <h3 className="blog-title">{blog.title}</h3>
+      <p className="blog-author">Author: {blog.author}</p>
       {visible && (
         <>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
-              <p className="blog-author">Author: {blog.author}</p>
               <div style={{ display: "flex" }}>
                 <p style={{ marginRight: 30 }} className="blog-author">
                   Likes: {blog.likes}
                 </p>
                 <button
-                  onClick={() => Like()}
+                  onClick={() => handleLike(blog)}
                   style={{ paddingTop: 5, paddingBottom: 5 }}
                 >
                   Like
@@ -58,7 +58,9 @@ const Blog = ({ blog, user }) => {
           </div>
         </>
       )}
-      <button onClick={toggleVisibility}>{visible ? "hide" : "show"}</button>
+      <button onClick={toggleVisibility} className="visibility">
+        {visible ? "hide" : "show"}
+      </button>
     </div>
   );
 };

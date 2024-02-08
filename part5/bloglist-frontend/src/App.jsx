@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+// App.jsx
+
+import { useState, useEffect } from "react";
 import blogService from "./services/blogs";
 import "./style.css";
 import NewBlog from "./components/newBlog";
@@ -13,6 +15,7 @@ const App = () => {
   const [blogForm, setBlogForm] = useState(false);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+
   const [newBlogAdded, setNewBlogAdded] = useState(false);
 
   const [loginError, setLoginError] = useState(null);
@@ -62,36 +65,45 @@ const App = () => {
 
   const handleSubmit = async (blog) => {
     const token = user.token;
-    // Create a blog object with title, author, and url
-
     const config = {
       headers: { Authorization: `Bearer ${token}` },
     };
 
     try {
-      // Call blogService.addNewBlog to add a new blog
       const newBlog = await blogService.addNewBlog(blog, config);
 
-      // Check if it is successful
       if (newBlog) {
-        // If successful, add the new blog to the list of blogs
-        setBlogs(blogs.concat(newBlog));
+        setBlogs((prevBlogs) => [...prevBlogs, newBlog]);
         setNewBlogAdded(true);
-
-        // Set the title and author state variables
         setTitle(newBlog.title);
         setAuthor(newBlog.author);
 
-        // Reset success state after a delay (e.g., 3 seconds)
         setTimeout(() => {
           setNewBlogAdded(false);
-          setTitle(""); // Reset title
-          setAuthor(""); // Reset author
+          setTitle("");
+          setAuthor("");
         }, 3000);
       }
     } catch (error) {
       console.log(error.message);
     }
+  };
+
+  const handleLike = async (blog) => {
+    try {
+      await blogService.like(blog);
+      const updatedBlogs = await blogService.getAll();
+      const sortedBlogs = updatedBlogs.sort((a, b) => b.likes - a.likes);
+      setBlogs(sortedBlogs);
+    } catch (error) {
+      console.error("Error liking the blog:", error.message);
+    }
+  };
+
+  const handleRemove = (id) => {
+    // Filter out the deleted blog from the blogs array
+    const updatedBlogs = blogs.filter((blog) => blog.id !== id);
+    setBlogs(updatedBlogs);
   };
 
   const hideWhenVisible = { display: blogForm ? "none" : "" };
@@ -137,7 +149,7 @@ const App = () => {
           </button>
           {newBlogAdded && (
             <h3>
-              A newblog {title} added successfully by {author}
+              A new blog {title} added successfully by {author}
             </h3>
           )}
 
@@ -152,7 +164,12 @@ const App = () => {
             </div>
           </div>
 
-          <AllBlogs user={user} blogs={blogs} />
+          <AllBlogs
+            user={user}
+            blogs={blogs}
+            handleLike={handleLike}
+            handleRemove={handleRemove}
+          />
         </>
       )}
     </div>

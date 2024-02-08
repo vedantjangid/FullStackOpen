@@ -1,11 +1,16 @@
-import React, { useState } from "react";
 import Blog from "./Blogs";
 
-const AllBlogs = ({ blogs, user }) => {
+const AllBlogs = ({ blogs, user, handleLike, handleRemove }) => {
   return (
     <>
       {blogs.map((blog) => (
-        <Blog user={user} key={blog.id} blog={blog} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          user={user}
+          handleLike={handleLike}
+          handleRemove={handleRemove}
+        />
       ))}
     </>
   );

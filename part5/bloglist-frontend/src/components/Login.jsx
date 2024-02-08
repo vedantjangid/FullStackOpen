@@ -1,4 +1,3 @@
-import React from "react";
 import "../styles.css"; // Make sure to import your CSS file
 
 const Login = () => {
