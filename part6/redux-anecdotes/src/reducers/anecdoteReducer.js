@@ -44,7 +44,7 @@ const reducer = (state = initialState, action) => {
       );
 
     case "add_anecdote":
-      console.log(action.payload.content);
+      // console.log(action.payload.content);
       newAnecdoteContent = action.payload.content;
       newAnecdoteId = getId();
       newAnecdote = {
