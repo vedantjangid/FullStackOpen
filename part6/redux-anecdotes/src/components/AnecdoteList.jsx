@@ -6,7 +6,7 @@ const AnecdoteList = () => {
     if (filter) {
       res = anecdotes.filter((anecdote) => anecdote.content.includes(filter));
     }
-
+    console.log(res);
     return res;
   });
 
