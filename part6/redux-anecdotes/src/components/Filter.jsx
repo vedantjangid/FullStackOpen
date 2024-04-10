@@ -1,20 +1,37 @@
 import { useDispatch } from "react-redux";
-import { filterChange } from "../reducers/filterReducer";
+import { setFilter } from "../reducers/filterReducer"; // Importing setFilter action creator
+
+// const Filter = () => {
+//   const dispatch = useDispatch();
+
+//   const handleChange = (event) => {
+//     dispatch(filterChange(event.target.value));
+//   };
+
+//   const style = {
+//     marginBottom: 10,
+//   };
+
+//   return (
+//     <div style={style}>
+//       filter <input onChange={handleChange} />
+//     </div>
+//   );
+// };
+
+// export default Filter;
 
 const Filter = () => {
   const dispatch = useDispatch();
 
   const handleChange = (event) => {
-    dispatch(filterChange(event.target.value));
-  };
-
-  const style = {
-    marginBottom: 10,
+    const filterValue = event.target.value;
+    dispatch(setFilter(filterValue)); // Dispatching the action with the filter value
   };
 
   return (
-    <div style={style}>
-      filter <input onChange={handleChange} />
+    <div>
+      Filter: <input onChange={handleChange} />
     </div>
   );
 };
