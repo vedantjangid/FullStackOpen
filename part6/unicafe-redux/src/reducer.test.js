@@ -17,7 +17,7 @@ describe('unicafe reducer', () => {
     const newState = counterReducer(undefined, action)
     expect(newState).toEqual(initialState)
   })
-
+ 
   test('good is incremented', () => {
     const action = {
       type: 'GOOD'
