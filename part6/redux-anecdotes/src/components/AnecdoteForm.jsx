@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { addAnecdote } from "../reducers/anecdoteReducer"; // Assuming that's the correct path to your reducer
+import { addAnecdote, createAnecdote } from "../reducers/anecdoteReducer"; // Assuming that's the correct path to your reducer
 import {
   removeNotification,
   setNotification,
@@ -17,6 +17,7 @@ const AnecdoteForm = () => {
       dispatch(removeNotification());
     }, 5000);
     // Dispatch the addAnecdote action using the action creator
+    dispatch(createAnecdote(content));
     dispatch(addAnecdote({ content }));
   };
 

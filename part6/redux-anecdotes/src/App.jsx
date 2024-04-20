@@ -1,18 +1,23 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AnecdoteForm from "./components/AnecdoteForm";
 import AnecdoteList from "./components/AnecdoteList";
 import Filter from "./components/Filter";
 import Notification from "./components/Notification";
 
+import { useEffect } from "react";
+import { initializeAnecdotes } from "./reducers/anecdoteReducer";
+
 const App = () => {
-  // Selecting the showNotification state from Redux store
+  const dispatch = useDispatch();
   const showNotification = useSelector((state) => state.notification);
+
+  useEffect(() => {
+    dispatch(initializeAnecdotes());
+  }, [dispatch]);
 
   return (
     <div>
-      {/* Rendering Notification component conditionally based on showNotification */}
       <Notification notification={showNotification} />
-
       <h2>Anecdotes</h2>
       <Filter />
       <AnecdoteList />
