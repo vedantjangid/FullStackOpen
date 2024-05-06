@@ -10,13 +10,11 @@ server.get("/", (req, res) => {
 });
 
 const validator = (request, response, next) => {
-  console.log();
-
   const { content } = request.body;
 
   if (request.method === "POST" && (!content || content.length < 5)) {
     return response.status(400).json({
-      error: "too short anecdote, must have length 5 or more",
+      error: "Too short anecdote, must have a length of 5 or more characters.",
     });
   } else {
     next();
